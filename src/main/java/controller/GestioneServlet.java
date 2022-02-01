@@ -57,12 +57,20 @@ public class GestioneServlet extends HttpServlet {
 		//siccome ho fatto la classe AzioneFactory nella quale ho implementato lo switch sotto
 		//li dentro allora posso procedere cosi
 		
-		new AzioniFactory().create(operazione).esegui(request, response, gm);
+		//new AzioniFactory().create(operazione).esegui(request, response, gm);
 		// siccome AzioniFactory resituisce un oggetto di tipo azioni posso richiamre il metodo esegui su di esso
 		//scritto in maniera meno compatta serebbe questo
 		/*AzioniFactory factory=new AzioniFactory();//<----------
 		Azioni azioneCorrente= factory.create(operazione);
 		azioneCorrente.esegui(request, response, gm);*/
+		
+		//stessa cosa ma implementando sia Singleton che Factorymethod
+		try {
+			AzioniFactory.getInstance().create(operazione).esegui(request, response, gm);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 		
