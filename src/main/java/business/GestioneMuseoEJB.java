@@ -1,5 +1,9 @@
 package business;
 
+import java.util.List;
+
+import org.postgresql.xml.NullErrorHandler;
+
 import dao.ArtistaDao;
 import dao.MuseoDao;
 import jakarta.ejb.LocalBean;
@@ -21,7 +25,7 @@ public class GestioneMuseoEJB implements GestioneMuseoEJBLocal {
 
 	@PersistenceContext(unitName = "calcioPS")
 	EntityManager em;
-	
+
 	private ArtistaDao artistadao;
 	private MuseoDao museodao;
 
@@ -34,35 +38,119 @@ public class GestioneMuseoEJB implements GestioneMuseoEJBLocal {
 		return em;
 	}
 
+	public void saveMuseo(Museo m) throws Exception {
+		
+		if (m.getCitta() == null || m.getNome() == null) {
+
+			throw new Exception("devi inserire per forza una citta e un nome del museo");
+		}
+		
+		saveMuseo(m.getNome(),String.valueOf(m.getId()),m.getCitta());
+
+	}
+	
+	                                  //un int non puo essere null
+	                                  //quindi utlizzo la classe Wrapper
+	//public void saveMuseo(String nome,Integer id,String citta)
+	public void saveMuseo(String nome,String id,String citta) throws Exception {
+		if (nome.isBlank() || id == null || citta.isBlank() ) {
+
+			throw new Exception("devi inserire per forza una citta e un nome del museo");
+		}
+		
+		Museo m= new Museo();
+		m.setCitta(citta);
+		m.setId(Integer.valueOf(id));
+		m.setNome(nome);
+		
+		getMuseodao().update(m);
+		
+		
+	}
+
+	public void insertMuseo(Museo m) throws Exception {
+
+	
+		insertMuseo(m.getNome(),m.getCitta());
+
+	}
+	
+	public void insertMuseo(String nome,String citta) throws Exception {
+		if (nome == null || citta == null) {
+
+			throw new Exception("devi inserire per forza una citta e un nome del museo");
+		}
+		if (citta.isBlank() || nome.isBlank()) {
+
+			throw new Exception("devi inserire per forza una citta e un nome del museo");
+		}
+		
+		Museo m = new Museo();
+		m.setCitta(citta);
+	
+		m.setNome(nome);
+		
+		getMuseodao().insert(m);
+	}
+	
+	
+	public void removeMuseo(int id) throws Exception {
+		
+		getMuseodao().deleteByPK(id);
+		
+		
+	}
+	
+	
+	public void removeMuseo(String id) throws Exception {
+		
+		if(id==null) {
+			
+			throw new Exception("il parametro id non presente nella form");
+		}
+		
+		if(id.isBlank()) {
+			throw new Exception("non hai inserito l'id");
+		}
+		
+		removeMuseo(id);
+		
+	}
+	
+	public void removeMuseo(Museo m) throws Exception {
+		
+		removeMuseo(m.getId());
+	}
+	
+	
+	public List<Museo> getAllMusei(){
+		
+		return getMuseodao().getAll();
+		
+		
+	}
 	
 	
 	
-	/*public void saveMuseo(Museo m) {
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
-		em.merge(m);
+	/*public void removeMuseo(Museo m) throws Exception {
+		
+		getMuseodao().deleteByPK(m.getId());
 
-	}
-
-	public void insertMuseo(Museo m) {
-
-		em.persist(m);
-
-	}
-
-	public void removeMuseo(Museo m) {
-
-		em.remove(em.merge(m));
-
-	}*/
-
-	public Museo getEntityById(int id) {
-
-		return em.find(Museo.class, id);
 
 	}
 
-	public void removeMuseoById(String id) throws Exception {
 
+	public void removeMuseo(String id) throws Exception {
 
 		if (id == null) {
 			throw new Exception("devi inserire un id museo");
@@ -72,39 +160,61 @@ public class GestioneMuseoEJB implements GestioneMuseoEJBLocal {
 			throw new Exception("devi inserire un id museo");
 		}
 
-		removeMuseoById(Integer.valueOf(id));
+		removeMuseo(Integer.valueOf(id));
+
+	}
+
+	public void removeMuseo(int id) throws Exception {
+
+		getMuseodao().deleteByPK(id);
+	}*/
+	
+	
+	//la depreco perche in questo esercizio usiamo il pattern Dao quindi tutti i metodi vanno
+	//richiamati tramiti il dao
+	@Deprecated
+	public Museo getEntityById(int id) {
+
+		return em.find(Museo.class, id);
 
 	}
 	
-	public void removeMuseoById(int id) throws Exception {
+	public Museo getMuseoById(int id) {
 
-		Museo m = getEntityById((Integer.valueOf(id)));
-
-		if (m == null) {
-
-			throw new Exception("il museo non esiste");
-
-		}
+		return getMuseodao().retriveByPK(id);
 
 	}
+	
+	public Museo getMuseoById(String id) throws Exception {
 
-	//getter di tipo lazy quindi setto i dao solo quando li chiamo dal getter
-	public ArtistaDao getArtistadao() {
-		if(artistadao==null) {
-			artistadao=new ArtistaDao(em);
+		
+		if(id==null || id.isBlank()) {
+			
+			throw new Exception("Manca id museo");
 		}
 		
+		return getMuseoById(Integer.valueOf(id));
+
+	}
+	
+
+	// getter di tipo lazy quindi setto i dao solo quando li chiamo dal getter
+	public ArtistaDao getArtistadao() {
+		if (artistadao == null) {
+			artistadao = new ArtistaDao(em);
+		}
+
 		return artistadao;
 	}
 
 	public void setArtistadao(ArtistaDao artistadao) {
-		
+
 		this.artistadao = artistadao;
 	}
 
 	public MuseoDao getMuseodao() {
-		if(museodao==null) {
-			museodao=new MuseoDao(em);
+		if (museodao == null) {
+			museodao = new MuseoDao(em);
 		}
 		return museodao;
 	}

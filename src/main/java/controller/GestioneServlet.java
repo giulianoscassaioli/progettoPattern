@@ -67,9 +67,11 @@ public class GestioneServlet extends HttpServlet {
 		//stessa cosa ma implementando sia Singleton che Factorymethod
 		try {
 			AzioniFactory.getInstance().create(operazione).esegui(request, response, gm);
+			
+			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			
 		}
 		
 		
